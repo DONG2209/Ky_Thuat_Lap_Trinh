@@ -13,16 +13,21 @@ try:
     shodan_api = shodan.Shodan(SHODAN_API_KEY)
     
     # Tìm kiếm các máy chủ FTP với cổng 21 và người dùng đăng nhập ở chế độ Anonymous
-    results = shodan_api.search('port:21 Anonymous user logged in')
+    # Sử dụng cursor để lấy kết quả từng trang
+    cursor = shodan_api.search_cursor('port:21 Anonymous user logged in')
     
-    # In ra số lượng máy chủ được tìm thấy
-    print('Number of hosts:', len(results['matches']))
+    # Đếm số lượng máy chủ được tìm thấy
+    num_hosts = 0
     
-    # Lặp qua các kết quả và thêm địa chỉ IP của máy chủ vào danh sách
-    for result in results['matches']:
-        if result['ip_str'] is not None:   # nêu ip không rỗng thì thêm vào mảng servers
+    # Lặp qua từng kết quả và thêm địa chỉ IP của máy chủ vào danh sách
+    for result in cursor:
+        if 'ip_str' in result:
             servers.append(result['ip_str'])
+            num_hosts += 1
 
+    # In ra số lượng máy chủ được tìm thấy
+    print('Number of hosts:', num_hosts)
+    
     # In ra từng địa chỉ IP của máy chủ
     for server in servers:
         print(server)
@@ -30,4 +35,3 @@ try:
 # Bắt các ngoại lệ nếu có lỗi xảy ra trong quá trình thực thi
 except Exception as e:
     print('Error:', e)
-
